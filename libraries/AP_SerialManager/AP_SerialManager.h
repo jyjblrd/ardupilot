@@ -86,6 +86,7 @@ public:
         // Reserving Serial Protocol 47 for SerialProtocol_IQ
         SerialProtocol_PPP = 48,
         SerialProtocol_IBUS_Telem = 49,                // i-BUS telemetry data, ie via sensor port of FS-iA6B
+        SerialProtocol_MotorControlOutput = 50,        // normalized motor-control output for external mixers
         SerialProtocol_NumProtocols                    // must be the last value
     };
 
