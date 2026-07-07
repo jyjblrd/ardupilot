@@ -612,6 +612,12 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECTVARPTR(motors, "MOT_",      &copter.motors_var_info),
 #endif
 
+#if AP_MOTOR_CONTROL_OUTPUT_ENABLED
+    // @Group: MCOUT_
+    // @Path: ../libraries/AP_MotorControlOutput/AP_MotorControlOutput.cpp
+    GOBJECT(motor_control_output, "MCOUT_", AP_MotorControlOutput),
+#endif
+
     // @Group: RCMAP_
     // @Path: ../libraries/AP_RCMapper/AP_RCMapper.cpp
     GOBJECT(rcmap, "RCMAP_",        RCMapper),

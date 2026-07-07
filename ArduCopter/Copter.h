@@ -47,6 +47,7 @@
 #include <AC_AttitudeControl/AC_PosControl.h>                   // Position control library
 #include <AC_AttitudeControl/AC_CommandModel.h>                 // Command model library
 #include <AP_Motors/AP_Motors.h>            // AP Motors library
+#include <AP_MotorControlOutput/AP_MotorControlOutput.h>
 #include <Filter/Filter.h>                  // Filter library
 #include <AP_Vehicle/AP_Vehicle.h>          // needed for AHRS build
 #include <AP_InertialNav/AP_InertialNav.h>  // inertial navigation library
@@ -316,6 +317,10 @@ private:
     // external control library
 #if AP_EXTERNAL_CONTROL_ENABLED
     AP_ExternalControl_Copter external_control;
+#endif
+
+#if AP_MOTOR_CONTROL_OUTPUT_ENABLED
+    AP_MotorControlOutput motor_control_output;
 #endif
 
 

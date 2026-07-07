@@ -25,6 +25,7 @@ def build(bld):
             'AP_Follow',
             'AP_LTM_Telem',
             'AP_Devo_Telem',
+            'AP_MotorControlOutput',
             'AC_AutoTune',
             'AP_KDECAN',
             'AP_SurfaceDistance'
