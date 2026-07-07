@@ -698,6 +698,7 @@ private:
         STATIC=3,
         PREDICTED=4,
         EXTNAV=5,
+        IRBEACON=6,
     };
 
     // update the navigation filter status
@@ -790,6 +791,9 @@ private:
     // check for new valid GPS yaw data
     void readGpsYawData();
 
+    // check for a new IR beacon yaw pulse
+    void readIrBeaconYawData();
+
     // check for new altitude measurement data and update stored measurement if available
     void readBaroData();
 
@@ -801,6 +805,9 @@ private:
 
     // check for new airspeed data and update stored measurements if available
     void readAirSpdData();
+
+    bool writeEulerYawAngleToBuffer(EKF_obs_buffer_t<yaw_elements> &buffer, yaw_elements &yaw_data, uint32_t &last_yaw_meas_time_ms,
+                                    float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type);
 
 #if EK3_FEATURE_BEACON_FUSION
     // check for new range beacon data and update stored measurements if available
@@ -1351,12 +1358,16 @@ private:
     wheel_odm_elements wheelOdmDataDelayed;   // Body  frame odometry data at the fusion time horizon
 #endif
 
-    // GPS yaw sensor fusion
+    // independent yaw sensor fusion
     uint32_t yawMeasTime_ms;            // system time GPS yaw angle was last input to the data buffer
     EKF_obs_buffer_t<yaw_elements> storedYawAng;    // GPS yaw angle buffer
     yaw_elements yawAngDataNew;         // GPS yaw angle at the current time horizon
     yaw_elements yawAngDataDelayed;     // GPS yaw angle at the fusion time horizon
     yaw_elements yawAngDataStatic;      // yaw angle (regardless of yaw source) when the vehicle was last on ground and not moving
+    uint32_t irBeaconYawMeasTime_ms;    // system time IR beacon yaw angle was last input to the data buffer
+    uint32_t irBeaconYawLastSampleSequence; // last latched IR beacon pulse seen by this core
+    EKF_obs_buffer_t<yaw_elements> storedIRBeaconYawAng;  // IR beacon yaw angle buffer
+    yaw_elements irBeaconYawAngDataDelayed;   // IR beacon yaw angle at the fusion time horizon
 
     // Range Beacon Sensor Fusion
 #if EK3_FEATURE_BEACON_FUSION
@@ -1574,6 +1585,8 @@ private:
 
     uint32_t last_gps_yaw_ms; // last time the EKF attempted to use the GPS yaw
     uint32_t last_gps_yaw_fuse_ms; // last time the EKF successfully fused the GPS yaw
+    uint32_t last_irbeacon_yaw_ms; // last time the EKF attempted to use IR beacon yaw
+    uint32_t last_irbeacon_yaw_fuse_ms; // last time the EKF successfully fused IR beacon yaw
     bool gps_yaw_mag_fallback_ok;
     bool gps_yaw_mag_fallback_active;
     uint8_t gps_yaw_fallback_good_counter;

@@ -286,6 +286,12 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     AP_SUBGROUPINFO(serial_manager, "SERIAL", 31, AP_Vehicle, AP_SerialManager),
 #endif
 
+#if AP_IRBEACON_YAW_ENABLED
+    // @Group: IRYAW_
+    // @Path: ../AP_IRBeaconYaw/AP_IRBeaconYaw.cpp
+    AP_SUBGROUPINFO(irbeaconyaw, "IRYAW_", 32, AP_Vehicle, AP_IRBeaconYaw),
+#endif
+
     AP_GROUPEND
 };
 
@@ -415,6 +421,10 @@ void AP_Vehicle::setup()
     // init cargo gripper
 #if AP_GRIPPER_ENABLED
     AP::gripper().init();
+#endif
+
+#if AP_IRBEACON_YAW_ENABLED
+    irbeaconyaw.init();
 #endif
 
     // init_ardupilot is where the vehicle does most of its initialisation.

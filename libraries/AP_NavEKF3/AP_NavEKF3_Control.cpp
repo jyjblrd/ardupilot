@@ -641,6 +641,9 @@ bool NavEKF3_core::using_noncompass_for_yaw(void) const
         return ((imuSampleTime_ms - last_extnav_yaw_fusion_ms < 5000) || (imuSampleTime_ms - lastSynthYawTime_ms < 5000));
     }
 #endif
+    if (yaw_source_last == AP_NavEKF_Source::SourceYaw::IRBEACON) {
+        return imuSampleTime_ms - last_irbeacon_yaw_ms < 5000 || imuSampleTime_ms - lastSynthYawTime_ms < 5000;
+    }
     if (yaw_source_last == AP_NavEKF_Source::SourceYaw::GPS || yaw_source_last == AP_NavEKF_Source::SourceYaw::GPS_COMPASS_FALLBACK ||
         yaw_source_last == AP_NavEKF_Source::SourceYaw::GSF || !use_compass()) {
         return imuSampleTime_ms - last_gps_yaw_ms < 5000 || imuSampleTime_ms - lastSynthYawTime_ms < 5000;
@@ -741,7 +744,7 @@ void NavEKF3_core::checkGyroCalStatus(void)
     // check delta angle bias variances
     const ftype delAngBiasVarMax = sq(radians(0.15 * dtEkfAvg));
     if (!use_compass() && (yaw_source_last != AP_NavEKF_Source::SourceYaw::GPS) && (yaw_source_last != AP_NavEKF_Source::SourceYaw::GPS_COMPASS_FALLBACK) &&
-        (yaw_source_last != AP_NavEKF_Source::SourceYaw::EXTNAV)) {
+        (yaw_source_last != AP_NavEKF_Source::SourceYaw::EXTNAV) && (yaw_source_last != AP_NavEKF_Source::SourceYaw::IRBEACON)) {
         // rotate the variances into earth frame and evaluate horizontal terms only as yaw component is poorly observable without a yaw reference
         // which can make this check fail
         const Vector3F delAngBiasVarVec { P[10][10], P[11][11], P[12][12] };

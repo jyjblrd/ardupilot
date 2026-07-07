@@ -128,7 +128,10 @@ bool NavEKF3_core::setup_core(uint8_t _imu_index, uint8_t _core_index)
         return false;
     }
 #endif // EK3_FEATURE_BODY_ODOM
-    if(frontend->sources.gps_yaw_enabled() && !storedYawAng.init(obs_buffer_length)) {
+    if((frontend->sources.gps_yaw_enabled() || frontend->sources.ir_beacon_yaw_enabled()) && !storedYawAng.init(obs_buffer_length)) {
+        return false;
+    }
+    if(frontend->sources.ir_beacon_yaw_enabled() && !storedIRBeaconYawAng.init(obs_buffer_length)) {
         return false;
     }
 #if AP_RANGEFINDER_ENABLED
@@ -379,6 +382,9 @@ void NavEKF3_core::InitialiseVariables()
     yawMeasTime_ms = 0;
     memset(&yawAngDataNew, 0, sizeof(yawAngDataNew));
     memset(&yawAngDataDelayed, 0, sizeof(yawAngDataDelayed));
+    irBeaconYawMeasTime_ms = 0;
+    irBeaconYawLastSampleSequence = 0;
+    memset(&irBeaconYawAngDataDelayed, 0, sizeof(irBeaconYawAngDataDelayed));
 
 #if EK3_FEATURE_EXTERNAL_NAV
     // external nav data fusion
@@ -451,6 +457,7 @@ void NavEKF3_core::InitialiseVariablesMag()
     magFieldLearned = false;
     storedMag.reset();
     storedYawAng.reset();
+    storedIRBeaconYawAng.reset();
 #if EK3_FEATURE_EXTERNAL_NAV
     storedExtNavYawAng.reset();
 #endif
@@ -486,6 +493,7 @@ bool NavEKF3_core::InitialiseFilterBootstrap(void)
     readMagData();
     readGpsData();
     readGpsYawData();
+    readIrBeaconYawData();
     readBaroData();
 
     if (statesInitialised) {

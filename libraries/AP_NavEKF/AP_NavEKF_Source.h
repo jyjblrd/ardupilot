@@ -42,7 +42,8 @@ public:
         GPS = 2,
         GPS_COMPASS_FALLBACK = 3,
         EXTNAV = 6,
-        GSF = 8
+        GSF = 8,
+        IRBEACON = 9
     };
 
     // enum for OPTIONS parameter
@@ -105,6 +106,9 @@ public:
 
     // return true if GPS yaw is enabled on any source
     bool gps_yaw_enabled(void) const;
+
+    // return true if IR beacon yaw is enabled on any source
+    bool ir_beacon_yaw_enabled(void) const;
 
     // return true if wheel encoder is enabled on any source
     bool wheel_encoder_enabled(void) const;
