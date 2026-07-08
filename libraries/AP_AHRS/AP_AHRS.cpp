@@ -2447,6 +2447,15 @@ void AP_AHRS::writeExtNavVelData(const Vector3f &vel, float err, uint32_t timeSt
 #endif
 }
 
+// Write a measurement from an independent yaw angle sensor
+void AP_AHRS::writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms)
+{
+#if HAL_NAVEKF3_AVAILABLE
+    // type 2 specifies yaw is the first rotation of a 321 (ZYX) euler sequence, i.e. a heading
+    EKF3.writeEulerYawAngle(yawAngle, yawAngleErr, timeStamp_ms, 2);
+#endif
+}
+
 // get speed limit and XY navigation gain scale factor
 void AP_AHRS::getControlLimits(float &ekfGndSpdLimit, float &ekfNavVelGainScaler) const
 {

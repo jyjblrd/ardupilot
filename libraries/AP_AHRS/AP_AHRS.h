@@ -308,6 +308,12 @@ public:
     // Write velocity data from an external navigation system
     void writeExtNavVelData(const Vector3f &vel, float err, uint32_t timeStamp_ms, uint16_t delay_ms);
 
+    // Write a measurement from an independent yaw angle sensor (e.g. a yaw beacon).
+    // yawAngle is the vehicle yaw relative to true north in radians (321/ZYX rotation order),
+    // yawAngleErr is the 1SD measurement accuracy in radians and timeStamp_ms is the system
+    // time the measurement was taken, including all sensor latency.
+    void writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms);
+
     // get speed limit
     void getControlLimits(float &ekfGndSpdLimit, float &controlScaleXY) const;
     float getControlScaleZ(void) const;
