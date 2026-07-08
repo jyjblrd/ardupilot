@@ -721,6 +721,12 @@ void NavEKF3_core::readGpsYawData()
 {
     const auto &gps = dal.gps();
 
+    // the yaw beacon owns the yaw angle buffer when it is the selected yaw source;
+    // don't allow GPS yaw measurements to interleave with beacon measurements
+    if (frontend->sources.getYawSource() == AP_NavEKF_Source::SourceYaw::YAWBEACON) {
+        return;
+    }
+
     // if the GPS has yaw data then fuse it as an Euler yaw angle
     float yaw_deg, yaw_accuracy_deg;
     uint32_t yaw_time_ms;

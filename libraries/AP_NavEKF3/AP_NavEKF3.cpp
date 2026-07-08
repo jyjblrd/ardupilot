@@ -1584,6 +1584,13 @@ bool NavEKF3::getOptFlowSample(uint32_t& timeStamp_ms, Vector2f& flowRate, Vecto
 // write yaw angle sensor measurements
 void NavEKF3::writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
 {
+    // external yaw angle measurements are only consumed when the yaw beacon is the selected
+    // yaw source; reject them otherwise so they cannot interleave with GPS yaw measurements
+    // which share the same buffer
+    if (sources.getYawSource() != AP_NavEKF_Source::SourceYaw::YAWBEACON) {
+        return;
+    }
+
     dal.log_writeEulerYawAngle(yawAngle, yawAngleErr, timeStamp_ms, type);
 
     if (core) {

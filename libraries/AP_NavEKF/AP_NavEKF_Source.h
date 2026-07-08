@@ -42,7 +42,8 @@ public:
         GPS = 2,
         GPS_COMPASS_FALLBACK = 3,
         EXTNAV = 6,
-        GSF = 8
+        GSF = 8,
+        YAWBEACON = 9
     };
 
     // enum for OPTIONS parameter
@@ -89,6 +90,9 @@ public:
 
     // true if any source is GPS
     bool usingGPS() const;
+
+    // true if any source-set's yaw is the yaw beacon
+    bool yaw_beacon_enabled() const;
 
     // true if source parameters have been configured (used for parameter conversion)
     bool configured();

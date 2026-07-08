@@ -251,7 +251,8 @@ void NavEKF3_core::SelectMagFusion()
         (!use_compass() &&
          yaw_source_last != AP_NavEKF_Source::SourceYaw::GPS &&
          yaw_source_last != AP_NavEKF_Source::SourceYaw::GPS_COMPASS_FALLBACK &&
-         yaw_source_last != AP_NavEKF_Source::SourceYaw::EXTNAV)) {
+         yaw_source_last != AP_NavEKF_Source::SourceYaw::EXTNAV &&
+         yaw_source_last != AP_NavEKF_Source::SourceYaw::YAWBEACON)) {
 
         if ((!yawAlignComplete || yaw_source_reset) && ((yaw_source_last != AP_NavEKF_Source::SourceYaw::GSF) || (EKFGSF_yaw_valid_count >= GSF_YAW_VALID_HISTORY_THRESHOLD))) {
             realignYawGPS(false);
@@ -284,8 +285,10 @@ void NavEKF3_core::SelectMagFusion()
         return;
     }
 
-    // Handle case where we are using GPS yaw sensor instead of a magnetomer
-    if (yaw_source_last == AP_NavEKF_Source::SourceYaw::GPS || yaw_source_last == AP_NavEKF_Source::SourceYaw::GPS_COMPASS_FALLBACK) {
+    // Handle case where we are using a GPS yaw or yaw beacon sensor instead of a magnetomer.
+    // Both sources supply absolute yaw angle measurements via the storedYawAng buffer.
+    if (yaw_source_last == AP_NavEKF_Source::SourceYaw::GPS || yaw_source_last == AP_NavEKF_Source::SourceYaw::GPS_COMPASS_FALLBACK ||
+        yaw_source_last == AP_NavEKF_Source::SourceYaw::YAWBEACON) {
         bool have_fused_gps_yaw = false;
         if (storedYawAng.recall(yawAngDataDelayed,imuDataDelayed.time_ms)) {
             if (tiltAlignComplete && (!yawAlignComplete || yaw_source_reset)) {
@@ -322,7 +325,7 @@ void NavEKF3_core::SelectMagFusion()
             yaw_source_reset = true;
         }
 
-        if (yaw_source_last == AP_NavEKF_Source::SourceYaw::GPS) {
+        if (yaw_source_last == AP_NavEKF_Source::SourceYaw::GPS || yaw_source_last == AP_NavEKF_Source::SourceYaw::YAWBEACON) {
             // no fallback
             return;
         }

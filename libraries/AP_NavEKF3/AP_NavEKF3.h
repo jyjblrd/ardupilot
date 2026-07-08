@@ -236,6 +236,9 @@ public:
      * all measurement lag and transmission delays.
      * type: An integer specifying Euler rotation order used to define the yaw angle.
      * type = 1 specifies a 312 (ZXY) rotation order, type = 2 specifies a 321 (ZYX) rotation order.
+     *
+     * Measurements are only accepted when the active yaw source is SourceYaw::YAWBEACON as they
+     * share a buffer with GPS yaw measurements and must not interleave with them.
     */
     void writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type);
 
