@@ -54,6 +54,7 @@
 #include <AP_GyroFFT/AP_GyroFFT.h>
 #include <AP_Networking/AP_Networking.h>
 #include <AP_VisualOdom/AP_VisualOdom.h>
+#include <AP_YawBeacon/AP_YawBeacon.h>
 #include <AP_VideoTX/AP_VideoTX.h>
 #include <AP_MSP/AP_MSP.h>
 #include <AP_Frsky_Telem/AP_Frsky_Parameters.h>
@@ -403,6 +404,10 @@ protected:
 
 #if HAL_VISUALODOM_ENABLED
     AP_VisualOdom visual_odom;
+#endif
+
+#if AP_YAWBEACON_ENABLED
+    AP_YawBeacon yawbeacon;
 #endif
 
 #if HAL_WITH_ESC_TELEM

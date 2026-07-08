@@ -286,6 +286,12 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     AP_SUBGROUPINFO(serial_manager, "SERIAL", 31, AP_Vehicle, AP_SerialManager),
 #endif
 
+#if AP_YAWBEACON_ENABLED
+    // @Group: YBCN_
+    // @Path: ../AP_YawBeacon/AP_YawBeacon.cpp
+    AP_SUBGROUPINFO(yawbeacon, "YBCN_", 32, AP_Vehicle, AP_YawBeacon),
+#endif
+
     AP_GROUPEND
 };
 
@@ -458,6 +464,10 @@ void AP_Vehicle::setup()
 #if HAL_VISUALODOM_ENABLED
     // init library used for visual position estimation
     visual_odom.init();
+#endif
+
+#if AP_YAWBEACON_ENABLED
+    yawbeacon.init();
 #endif
 
 #if AP_VIDEOTX_ENABLED
@@ -633,6 +643,9 @@ const AP_Scheduler::Task AP_Vehicle::scheduler_tasks[] = {
     SCHED_TASK(send_watchdog_reset_statustext,         0.1,     20, 225),
 #if HAL_WITH_ESC_TELEM
     SCHED_TASK_CLASS(AP_ESC_Telem, &vehicle.esc_telem,      update,                  100,  50, 230),
+#endif
+#if AP_YAWBEACON_ENABLED
+    SCHED_TASK_CLASS(AP_YawBeacon, &vehicle.yawbeacon,      update,                  100,  50, 232),
 #endif
 #if HAL_GENERATOR_ENABLED
     SCHED_TASK_CLASS(AP_Generator, &vehicle.generator,      update,                   10,  50, 235),

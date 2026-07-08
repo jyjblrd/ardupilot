@@ -267,6 +267,7 @@ class ExtractFeatures(object):
             ('AP_DRONECAN_SERIAL_ENABLED', 'AP_DroneCAN_Serial::update'),
             ('AP_SERIALMANAGER_IMUOUT_ENABLED', 'AP_InertialSensor::send_uart_data'),
             ('AP_MOTOR_CONTROL_OUTPUT_ENABLED', 'AP_MotorControlOutput::update'),
+            ('AP_YAWBEACON_ENABLED', 'AP_YawBeacon::update'),
             ('AP_NETWORKING_BACKEND_PPP', 'AP_Networking_PPP::init'),
             ('AP_NETWORKING_CAN_MCAST_ENABLED', 'AP_Networking_CAN::start'),
             ('FORCE_APJ_DEFAULT_PARAMETERS', 'AP_Param::param_defaults_data'),
