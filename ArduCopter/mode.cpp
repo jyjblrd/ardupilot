@@ -67,6 +67,12 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             break;
 #endif
 
+#if AP_MOTOR_CONTROL_OUTPUT_ENABLED
+        case Mode::Number::MCOUT_PASS:
+            ret = &mode_mcout_pass;
+            break;
+#endif
+
 #if MODE_GUIDED_ENABLED
         case Mode::Number::GUIDED:
             ret = &mode_guided;
@@ -226,7 +232,10 @@ bool Copter::gcs_mode_enabled(const Mode::Number mode_num)
         (uint8_t)Mode::Number::SYSTEMID,
         (uint8_t)Mode::Number::AUTOROTATE,
         (uint8_t)Mode::Number::AUTO_RTL,
-        (uint8_t)Mode::Number::TURTLE
+        (uint8_t)Mode::Number::TURTLE,
+#if AP_MOTOR_CONTROL_OUTPUT_ENABLED
+        (uint8_t)Mode::Number::MCOUT_PASS,
+#endif
     };
 
     if (!block_GCS_mode_change((uint8_t)mode_num, mode_list, ARRAY_SIZE(mode_list))) {

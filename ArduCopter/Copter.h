@@ -213,6 +213,9 @@ public:
     friend class ModeGuided;
     friend class ModeLand;
     friend class ModeLoiter;
+#if AP_MOTOR_CONTROL_OUTPUT_ENABLED
+    friend class ModeMcoutPass;
+#endif
     friend class ModePosHold;
     friend class ModeRTL;
     friend class ModeSmartRTL;
@@ -1038,6 +1041,9 @@ private:
     ModeLand mode_land;
 #if MODE_LOITER_ENABLED
     ModeLoiter mode_loiter;
+#endif
+#if AP_MOTOR_CONTROL_OUTPUT_ENABLED
+    ModeMcoutPass mode_mcout_pass;
 #endif
 #if MODE_POSHOLD_ENABLED
     ModePosHold mode_poshold;

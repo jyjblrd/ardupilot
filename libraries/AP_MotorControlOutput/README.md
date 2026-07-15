@@ -20,6 +20,12 @@ Replace `x` with the serial port connected to the external controller. For examp
 
 `MCOUT_RATE` is the requested publish rate in Hz. It accepts values from 1 to 400 and defaults to 400. The actual output rate is limited by the vehicle scheduler loop rate.
 
+### Pilot passthrough flight mode
+
+ArduCopter flight mode `29` (`MCOUT_PASS`) sends the calibrated pilot input positions directly in the four primary command fields instead of sending attitude-controller output. Assign `29` to any `FLTMODE1` through `FLTMODE6` switch position; `FLTMODE_CH=5` uses RC channel 5 as the mode switch.
+
+Roll, pitch, and yaw use the normal RC calibration and deadzone and are normalized to `-1..1`. Throttle uses the calibrated linear stick position from `0..1`; it does not use Copter's hover-throttle remapping. Arming, motor interlock, emergency stop, packet freshness, and all receiver-side safety requirements still apply. The mode also feeds these direct inputs into ArduCopter's normal motor path, so leave the FC motor functions unassigned when MCOUT is the only intended actuator output. Other flight modes continue to publish the normal stabilized control commands.
+
 ## Wiring
 
 Connect the ArduPilot UART transmit pin to the external controller UART receive pin, and connect grounds:
@@ -96,6 +102,7 @@ The `flags` field is a bitmask:
 | 10 | `LIMIT_THROTTLE_LOWER` | Lower throttle limit is active |
 | 11 | `LIMIT_THROTTLE_UPPER` | Upper throttle limit is active |
 | 12 | `THRUST_BOOST` | Thrust boost is active |
+| 13 | `PILOT_PASSTHROUGH` | Primary commands are normalized pilot input positions from `MCOUT_PASS` mode |
 
 ### Spool States
 

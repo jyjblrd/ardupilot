@@ -28,7 +28,12 @@ const AP_Param::GroupInfo AP_MotorControlOutput::var_info[] = {
 AP_MotorControlOutput::AP_MotorControlOutput() :
     _uart(nullptr),
     _last_send_us(0),
-    _sequence(0)
+    _sequence(0),
+    _pilot_passthrough_active(false),
+    _pilot_roll(0.0f),
+    _pilot_pitch(0.0f),
+    _pilot_yaw(0.0f),
+    _pilot_throttle(0.0f)
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
@@ -101,8 +106,32 @@ uint16_t AP_MotorControlOutput::make_flags(const AP_Motors &motors, const bool o
     if (motors.get_thrust_boost()) {
         flags |= FLAG_THRUST_BOOST;
     }
+    if (_pilot_passthrough_active) {
+        flags |= FLAG_PILOT_PASSTHROUGH;
+    }
 
     return flags;
+}
+
+void AP_MotorControlOutput::set_pilot_passthrough(const float roll,
+                                                  const float pitch,
+                                                  const float yaw,
+                                                  const float throttle)
+{
+    _pilot_roll = constrain_float(roll, -1.0f, 1.0f);
+    _pilot_pitch = constrain_float(pitch, -1.0f, 1.0f);
+    _pilot_yaw = constrain_float(yaw, -1.0f, 1.0f);
+    _pilot_throttle = constrain_float(throttle, 0.0f, 1.0f);
+    _pilot_passthrough_active = true;
+}
+
+void AP_MotorControlOutput::clear_pilot_passthrough()
+{
+    _pilot_passthrough_active = false;
+    _pilot_roll = 0.0f;
+    _pilot_pitch = 0.0f;
+    _pilot_yaw = 0.0f;
+    _pilot_throttle = 0.0f;
 }
 
 void AP_MotorControlOutput::fill_packet(const AP_Motors &motors, Packet &packet)
@@ -129,10 +158,17 @@ void AP_MotorControlOutput::fill_packet(const AP_Motors &motors, Packet &packet)
 
     // Primary commands are zero unless the external controller may drive actuators.
     if (output_enabled) {
-        packet.roll = roll_feedback + roll_feedforward;
-        packet.pitch = pitch_feedback + pitch_feedforward;
-        packet.yaw = yaw_feedback + yaw_feedforward;
-        packet.throttle = motors.get_throttle();
+        if (_pilot_passthrough_active) {
+            packet.roll = _pilot_roll;
+            packet.pitch = _pilot_pitch;
+            packet.yaw = _pilot_yaw;
+            packet.throttle = _pilot_throttle;
+        } else {
+            packet.roll = roll_feedback + roll_feedforward;
+            packet.pitch = pitch_feedback + pitch_feedforward;
+            packet.yaw = yaw_feedback + yaw_feedforward;
+            packet.throttle = motors.get_throttle();
+        }
     }
 
     packet.flags = make_flags(motors, output_enabled);

@@ -32,6 +32,7 @@ public:
         FLAG_LIMIT_THROTTLE_LOWER = 1U << 10,
         FLAG_LIMIT_THROTTLE_UPPER = 1U << 11,
         FLAG_THRUST_BOOST         = 1U << 12,
+        FLAG_PILOT_PASSTHROUGH    = 1U << 13,
     };
 
     enum class SpoolState : uint8_t {
@@ -90,6 +91,12 @@ public:
     // Publish the latest AP_Motors control state when the rate limiter allows.
     void update();
 
+    // Override primary commands with normalized pilot inputs.
+    void set_pilot_passthrough(float roll, float pitch, float yaw, float throttle);
+
+    // Resume publishing the attitude controller's motor commands.
+    void clear_pilot_passthrough();
+
 private:
     bool should_send(uint32_t now_us);
     void fill_packet(const AP_Motors &motors, Packet &packet);
@@ -99,6 +106,11 @@ private:
     AP_HAL::UARTDriver *_uart;
     uint32_t _last_send_us;
     uint32_t _sequence;
+    bool _pilot_passthrough_active;
+    float _pilot_roll;
+    float _pilot_pitch;
+    float _pilot_yaw;
+    float _pilot_throttle;
 };
 
 #endif // AP_MOTOR_CONTROL_OUTPUT_ENABLED

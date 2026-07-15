@@ -37,6 +37,7 @@ constexpr uint16_t FLAG_SOFT_ARMED = 1U << 1;
 constexpr uint16_t FLAG_INTERLOCK = 1U << 2;
 constexpr uint16_t FLAG_EMERGENCY_STOP = 1U << 3;
 constexpr uint16_t FLAG_OUTPUT_ENABLED = 1U << 6;
+constexpr uint16_t FLAG_PILOT_PASSTHROUGH = 1U << 13;
 
 struct __attribute__((packed)) ControlOutputPacket {
     uint16_t magic;
@@ -230,6 +231,9 @@ void flags_to_string(const uint16_t flags, char *buffer, const size_t buffer_len
     }
     if (flags & (1U << 12)) {
         append_flag(buffer, buffer_len, "BOOST");
+    }
+    if (flags & FLAG_PILOT_PASSTHROUGH) {
+        append_flag(buffer, buffer_len, "PASS");
     }
     if (buffer[0] == '\0') {
         std::snprintf(buffer, buffer_len, "none");
