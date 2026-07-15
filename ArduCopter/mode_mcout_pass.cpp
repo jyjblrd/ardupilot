@@ -30,6 +30,12 @@ void ModeMcoutPass::run()
         motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
     }
 
+    // Mark takeoff before the land detector sees unrestricted throttle output.
+    if (motors->get_spool_state() == AP_Motors::SpoolState::THROTTLE_UNLIMITED &&
+        !motors->limit.throttle_lower) {
+        set_land_complete(false);
+    }
+
     // Keep the normal motor state aligned with the exported command.
     motors->set_roll(roll);
     motors->set_roll_ff(0.0f);
