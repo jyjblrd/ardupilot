@@ -239,6 +239,9 @@ public:
     */
     void writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type);
 
+    // Write an absolute-yaw sample from the IR beacon replay stream.
+    void writeIRBeaconYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type);
+
     /*
      * Write position and quaternion data from an external navigation system
      *

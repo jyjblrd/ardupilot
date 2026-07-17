@@ -767,7 +767,7 @@ void NavEKF3_core::readIrBeaconYawData()
     yaw_elements ir_yaw_data {};
     if (writeEulerYawAngleToBuffer(storedIRBeaconYawAng, ir_yaw_data, irBeaconYawMeasTime_ms, yaw_rad, yaw_accuracy_rad, yaw_time_ms, 2)) {
         if (core_index == 0) {
-            dal.log_writeEulerYawAngle(yaw_rad, yaw_accuracy_rad, yaw_time_ms, 2);
+            dal.log_writeIRBeaconYawAngle(yaw_rad, yaw_accuracy_rad, yaw_time_ms, 2);
         }
     }
 #endif
@@ -1084,13 +1084,13 @@ bool NavEKF3_core::writeEulerYawAngleToBuffer(EKF_obs_buffer_t<yaw_elements> &bu
 void NavEKF3_core::writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
 {
     IGNORE_RETURN(writeEulerYawAngleToBuffer(storedYawAng, yawAngDataNew, yawMeasTime_ms, yawAngle, yawAngleErr, timeStamp_ms, type));
-#if APM_BUILD_TYPE(APM_BUILD_Replay)
-    // Replay feeds logged IR beacon yaw pulses through this public yaw angle path.
-    if (frontend->sources.ir_beacon_yaw_enabled()) {
-        yaw_elements ir_yaw_data {};
-        IGNORE_RETURN(writeEulerYawAngleToBuffer(storedIRBeaconYawAng, ir_yaw_data, irBeaconYawMeasTime_ms, yawAngle, yawAngleErr, timeStamp_ms, type));
-    }
-#endif
+}
+
+void NavEKF3_core::writeIRBeaconYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
+{
+    yaw_elements ir_yaw_data {};
+    IGNORE_RETURN(writeEulerYawAngleToBuffer(storedIRBeaconYawAng, ir_yaw_data, irBeaconYawMeasTime_ms,
+                                             yawAngle, yawAngleErr, timeStamp_ms, type));
 }
 
 // Writes the default equivalent airspeed and 1-sigma uncertainty in m/s to be used in forward flight if a measured airspeed is required and not available.

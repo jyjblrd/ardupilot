@@ -128,7 +128,7 @@ bool NavEKF3_core::setup_core(uint8_t _imu_index, uint8_t _core_index)
         return false;
     }
 #endif // EK3_FEATURE_BODY_ODOM
-    if((frontend->sources.gps_yaw_enabled() || frontend->sources.ir_beacon_yaw_enabled()) && !storedYawAng.init(obs_buffer_length)) {
+    if(frontend->sources.gps_yaw_enabled() && !storedYawAng.init(obs_buffer_length)) {
         return false;
     }
     if(frontend->sources.ir_beacon_yaw_enabled() && !storedIRBeaconYawAng.init(obs_buffer_length)) {
@@ -384,6 +384,8 @@ void NavEKF3_core::InitialiseVariables()
     memset(&yawAngDataDelayed, 0, sizeof(yawAngDataDelayed));
     irBeaconYawMeasTime_ms = 0;
     irBeaconYawLastSampleSequence = 0;
+    last_irbeacon_yaw_ms = 0;
+    last_irbeacon_yaw_fuse_ms = 0;
     memset(&irBeaconYawAngDataDelayed, 0, sizeof(irBeaconYawAngDataDelayed));
 
 #if EK3_FEATURE_EXTERNAL_NAV
