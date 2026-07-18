@@ -6,6 +6,10 @@
 #include <AP_Logger/AP_Logger.h>
 #include <AP_DAL/AP_DAL.h>
 #include <AP_InternalError/AP_InternalError.h>
+#include <AP_IRBeaconYaw/AP_IRBeaconYaw_config.h>
+#if AP_IRBEACON_YAW_ENABLED
+#include <AP_IRBeaconYaw/AP_IRBeaconYaw.h>
+#endif
 
 #if AP_RANGEFINDER_ENABLED
 /********************************************************
@@ -737,6 +741,38 @@ void NavEKF3_core::readGpsYawData()
     }
 }
 
+// check for new valid IR beacon yaw data
+void NavEKF3_core::readIrBeaconYawData()
+{
+#if AP_IRBEACON_YAW_ENABLED && !APM_BUILD_TYPE(APM_BUILD_AP_DAL_Standalone) && !APM_BUILD_TYPE(APM_BUILD_Replay)
+    if (!frontend->sources.ir_beacon_yaw_enabled()) {
+        return;
+    }
+
+    auto *irbeaconyaw = AP::irbeaconyaw();
+    if (irbeaconyaw == nullptr || !irbeaconyaw->healthy()) {
+        return;
+    }
+
+    float yaw_rad;
+    float yaw_accuracy_rad;
+    uint32_t yaw_time_ms;
+    uint32_t sample_sequence;
+    if (!irbeaconyaw->get_yaw_sample(yaw_rad, yaw_accuracy_rad, yaw_time_ms, sample_sequence) ||
+        sample_sequence == irBeaconYawLastSampleSequence) {
+        return;
+    }
+    irBeaconYawLastSampleSequence = sample_sequence;
+
+    yaw_elements ir_yaw_data {};
+    if (writeEulerYawAngleToBuffer(storedIRBeaconYawAng, ir_yaw_data, irBeaconYawMeasTime_ms, yaw_rad, yaw_accuracy_rad, yaw_time_ms, 2)) {
+        if (core_index == 0) {
+            dal.log_writeIRBeaconYawAngle(yaw_rad, yaw_accuracy_rad, yaw_time_ms, 2);
+        }
+    }
+#endif
+}
+
 // read the delta angle and corresponding time interval from the IMU
 // return false if data is not available
 bool NavEKF3_core::readDeltaAngle(uint8_t ins_index, Vector3F &dAng, ftype &dAngDT) {
@@ -1019,28 +1055,42 @@ void NavEKF3_core::readRngBcnData()
 *              Independant yaw sensor measurements      *
 ********************************************************/
 
-void NavEKF3_core::writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
+bool NavEKF3_core::writeEulerYawAngleToBuffer(EKF_obs_buffer_t<yaw_elements> &buffer, yaw_elements &yaw_data, uint32_t &last_yaw_meas_time_ms,
+                                              float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
 {
     // limit update rate to maximum allowed by sensor buffers and fusion process
     // don't try to write to buffer until the filter has been initialised
-    if (((timeStamp_ms - yawMeasTime_ms) < frontend->sensorIntervalMin_ms) || !statesInitialised) {
-        return;
+    if (((timeStamp_ms - last_yaw_meas_time_ms) < frontend->sensorIntervalMin_ms) || !statesInitialised) {
+        return false;
     }
 
-    yawAngDataNew.yawAng = yawAngle;
-    yawAngDataNew.yawAngErr = yawAngleErr;
+    yaw_data.yawAng = yawAngle;
+    yaw_data.yawAngErr = yawAngleErr;
     if (type == 2) {
-        yawAngDataNew.order = rotationOrder::TAIT_BRYAN_321;
+        yaw_data.order = rotationOrder::TAIT_BRYAN_321;
     } else if (type == 1) {
-        yawAngDataNew.order = rotationOrder::TAIT_BRYAN_312;
+        yaw_data.order = rotationOrder::TAIT_BRYAN_312;
     } else {
-        return;
+        return false;
     }
-    yawAngDataNew.time_ms = timeStamp_ms;
+    yaw_data.time_ms = timeStamp_ms;
 
-    storedYawAng.push(yawAngDataNew);
+    buffer.push(yaw_data);
 
-    yawMeasTime_ms = timeStamp_ms;
+    last_yaw_meas_time_ms = timeStamp_ms;
+    return true;
+}
+
+void NavEKF3_core::writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
+{
+    IGNORE_RETURN(writeEulerYawAngleToBuffer(storedYawAng, yawAngDataNew, yawMeasTime_ms, yawAngle, yawAngleErr, timeStamp_ms, type));
+}
+
+void NavEKF3_core::writeIRBeaconYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
+{
+    yaw_elements ir_yaw_data {};
+    IGNORE_RETURN(writeEulerYawAngleToBuffer(storedIRBeaconYawAng, ir_yaw_data, irBeaconYawMeasTime_ms,
+                                             yawAngle, yawAngleErr, timeStamp_ms, type));
 }
 
 // Writes the default equivalent airspeed and 1-sigma uncertainty in m/s to be used in forward flight if a measured airspeed is required and not available.

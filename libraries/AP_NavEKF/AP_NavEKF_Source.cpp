@@ -16,6 +16,10 @@
 #include "AP_NavEKF_Source.h"
 #include <AP_Math/AP_Math.h>
 #include <AP_DAL/AP_DAL.h>
+#include <AP_IRBeaconYaw/AP_IRBeaconYaw_config.h>
+#if AP_IRBEACON_YAW_ENABLED
+#include <AP_IRBeaconYaw/AP_IRBeaconYaw.h>
+#endif
 #include <AP_Logger/AP_Logger.h>
 #include <AP_HAL/AP_HAL.h>
 
@@ -54,7 +58,7 @@ const AP_Param::GroupInfo AP_NavEKF_Source::var_info[] = {
     // @Param: 1_YAW
     // @DisplayName: Yaw Source
     // @Description: Yaw Source
-    // @Values: 0:None, 1:Compass, 2:GPS, 3:GPS with Compass Fallback, 6:ExternalNav, 8:GSF
+    // @Values: 0:None, 1:Compass, 2:GPS, 3:GPS with Compass Fallback, 6:ExternalNav, 8:GSF, 9:IRBeacon
     // @User: Advanced
     AP_GROUPINFO("1_YAW", 5, AP_NavEKF_Source, _source_set[0].yaw, (int8_t)AP_NavEKF_Source::SourceYaw::COMPASS),
 
@@ -90,7 +94,7 @@ const AP_Param::GroupInfo AP_NavEKF_Source::var_info[] = {
     // @Param: 2_YAW
     // @DisplayName: Yaw Source (Secondary)
     // @Description: Yaw Source (Secondary)
-    // @Values: 0:None, 1:Compass, 2:GPS, 3:GPS with Compass Fallback, 6:ExternalNav, 8:GSF
+    // @Values: 0:None, 1:Compass, 2:GPS, 3:GPS with Compass Fallback, 6:ExternalNav, 8:GSF, 9:IRBeacon
     // @User: Advanced
     AP_GROUPINFO("2_YAW", 10, AP_NavEKF_Source, _source_set[1].yaw, (int8_t)AP_NavEKF_Source::SourceYaw::NONE),
 #endif
@@ -127,7 +131,7 @@ const AP_Param::GroupInfo AP_NavEKF_Source::var_info[] = {
     // @Param: 3_YAW
     // @DisplayName: Yaw Source (Tertiary)
     // @Description: Yaw Source (Tertiary)
-    // @Values: 0:None, 1:Compass, 2:GPS, 3:GPS with Compass Fallback, 6:ExternalNav, 8:GSF
+    // @Values: 0:None, 1:Compass, 2:GPS, 3:GPS with Compass Fallback, 6:ExternalNav, 8:GSF, 9:IRBeacon
     // @User: Advanced
     AP_GROUPINFO("3_YAW", 15, AP_NavEKF_Source, _source_set[2].yaw, (int8_t)AP_NavEKF_Source::SourceYaw::NONE),
 #endif
@@ -334,6 +338,7 @@ bool AP_NavEKF_Source::pre_arm_check(bool requires_position, char *failure_msg, 
     bool visualodom_required = false;
     bool optflow_required = false;
     bool wheelencoder_required = false;
+    bool irbeaconyaw_required = false;
 
     // check source params are valid
     for (uint8_t i=0; i<AP_NAKEKF_SOURCE_SET_MAX; i++) {
@@ -446,6 +451,9 @@ bool AP_NavEKF_Source::pre_arm_check(bool requires_position, char *failure_msg, 
         case SourceYaw::GSF:
             gps_required = true;
             break;
+        case SourceYaw::IRBEACON:
+            irbeaconyaw_required = true;
+            break;
         default:
             // invalid yaw value
             hal.util->snprintf(failure_msg, failure_msg_len, "Check EK3_SRC%d_YAW", (int)i+1);
@@ -516,6 +524,19 @@ bool AP_NavEKF_Source::pre_arm_check(bool requires_position, char *failure_msg, 
         return false;
     }
 
+    if (irbeaconyaw_required) {
+#if AP_IRBEACON_YAW_ENABLED
+        auto *irbeaconyaw = AP::irbeaconyaw();
+        const bool irbeaconyaw_available = irbeaconyaw != nullptr && irbeaconyaw->healthy();
+#else
+        const bool irbeaconyaw_available = false;
+#endif
+        if (!irbeaconyaw_available) {
+            hal.util->snprintf(failure_msg, failure_msg_len, ekf_requires_msg, "IRBeaconYaw");
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -569,6 +590,18 @@ bool AP_NavEKF_Source::gps_yaw_enabled(void) const
         const SourceYaw yaw = SourceYaw(src.yaw.get());
         if (yaw == SourceYaw::GPS ||
             yaw == SourceYaw::GPS_COMPASS_FALLBACK) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// return true if IR beacon yaw is enabled on any source
+bool AP_NavEKF_Source::ir_beacon_yaw_enabled(void) const
+{
+    for (uint8_t i=0; i<AP_NAKEKF_SOURCE_SET_MAX; i++) {
+        const auto &src = _source_set[i];
+        if (SourceYaw(src.yaw.get()) == SourceYaw::IRBEACON) {
             return true;
         }
     }

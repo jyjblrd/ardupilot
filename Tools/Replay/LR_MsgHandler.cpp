@@ -171,6 +171,12 @@ void LR_MsgHandler_REY3::process_message(uint8_t *msgbytes)
     ekf3.writeEulerYawAngle(msg.yawangle, msg.yawangleerr, msg.timestamp_ms, msg.type);
 }
 
+void LR_MsgHandler_RIY3::process_message(uint8_t *msgbytes)
+{
+    MSG_CREATE(RIY3, msgbytes);
+    ekf3.writeIRBeaconYawAngle(msg.yawangle, msg.yawangleerr, msg.timestamp_ms, msg.type);
+}
+
 void LR_MsgHandler_RISH::process_message(uint8_t *msgbytes)
 {
     MSG_CREATE(RISH, msgbytes);

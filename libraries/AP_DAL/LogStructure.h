@@ -16,6 +16,7 @@
     LOG_RSO3_MSG, \
     LOG_RWA3_MSG, \
     LOG_REY3_MSG, \
+    LOG_RIY3_MSG, \
     LOG_RFRN_MSG, \
     LOG_RISH_MSG, \
     LOG_RISI_MSG, \
@@ -143,6 +144,16 @@ struct log_RWA2 {
 // @LoggerMessage: REY3
 // @Description: Replay Euler Yaw event
 struct log_REY3 {
+    float yawangle;
+    float yawangleerr;
+    uint32_t timestamp_ms;
+    uint8_t type;
+    uint8_t _end;
+};
+
+// @LoggerMessage: RIY3
+// @Description: Replay IR beacon yaw event
+struct log_RIY3 {
     float yawangle;
     float yawangleerr;
     uint32_t timestamp_ms;
@@ -407,6 +418,8 @@ struct log_RBOH {
       "RWA3", "ff", "Airspeed,Uncertainty", "nn", "00" }, \
     { LOG_REY3_MSG, RLOG_SIZE(REY3),                                   \
       "REY3", "ffIB", "yawangle,yawangleerr,timestamp_ms,type", "???-", "???-" }, \
+    { LOG_RIY3_MSG, RLOG_SIZE(RIY3),                                   \
+      "RIY3", "ffIB", "yawangle,yawangleerr,timestamp_ms,type", "???-", "???-" }, \
     { LOG_RISH_MSG, RLOG_SIZE(RISH),                                   \
       "RISH", "HBBfBB", "LR,PG,PA,LD,AC,GC", "------", "------" }, \
     { LOG_RISI_MSG, RLOG_SIZE(RISI),                                   \

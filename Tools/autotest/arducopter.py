@@ -9989,6 +9989,74 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
         self.context_pop()
         self.reboot_sitl()
 
+    def IRBeaconYaw(self):
+        '''fuse intermittent absolute yaw pulses from a stationary IR beacon'''
+        self.context_push()
+        self.set_parameters({
+            "IRYAW_TYPE": 10,    # SITL receiver backend
+            "IRYAW_YAW": 90,     # away from the initial simulator heading
+            "IRYAW_DELAY": 15,   # exercise receiver latency compensation
+            "EK3_SRC1_YAW": 9,   # IRBeacon
+            "DISARM_DELAY": 0,
+        })
+        self.reboot_sitl()
+
+        # The first beacon crossing establishes absolute yaw, so take off in a
+        # mode which does not require an EKF position estimate.
+        self.change_mode('ALT_HOLD')
+        self.wait_sensor_state(mavutil.mavlink.MAV_SYS_STATUS_PREARM_CHECK,
+                               True, True, True, timeout=120)
+        self.arm_vehicle()
+        self.set_rc(3, 1700)
+        self.wait_altitude(8, 15, relative=True, timeout=60)
+        self.hover()
+
+        self.context_collect('STATUSTEXT')
+        self.set_rc(4, 1900)
+        self.wait_statustext("yaw aligned", timeout=30, check_context=True)
+        self.wait_statustext("is using GPS", timeout=60, check_context=True)
+        self.delay_sim_time(10)
+
+        def check_yaw_against_truth(duration, max_error_deg):
+            '''Compare adjacent estimator and simulator yaw samples.'''
+            start_time = self.get_sim_time()
+            last = {}
+            sample_count = 0
+            while self.get_sim_time_cached() - start_time < duration:
+                message = self.mav.recv_match(type=['ATTITUDE', 'SIMSTATE'],
+                                              blocking=True, timeout=1)
+                if message is None:
+                    continue
+                other_type = 'SIMSTATE' if message.get_type() == 'ATTITUDE' else 'ATTITUDE'
+                if other_type in last:
+                    error = abs(mavextra.angle_diff(math.degrees(message.yaw),
+                                                    math.degrees(last[other_type].yaw)))
+                    if error > max_error_deg:
+                        raise NotAchievedException(
+                            "yaw estimate diverges from truth (%f deg)" % error)
+                    sample_count += 1
+                    last = {}
+                else:
+                    last = {message.get_type(): message}
+            if sample_count < 10:
+                raise NotAchievedException(
+                    "too few yaw comparison samples (%u)" % sample_count)
+
+        # Track through a slow spin, then retain absolute yaw after stopping.
+        self.set_rc(4, 1600)
+        check_yaw_against_truth(10, 20)
+        self.set_rc(4, 1500)
+        self.delay_sim_time(3)
+        check_yaw_against_truth(5, 10)
+
+        # At high SITL speedup touchdown can occur before land_and_disarm()
+        # samples altitude, so wait directly on the terminal armed state.
+        self.change_mode('LAND')
+        self.wait_disarmed()
+        self.assert_current_onboard_log_contains_message("IRYW")
+        self.context_pop()
+        self.reboot_sitl()
+
     def AP_Avoidance(self):
         '''ADSB-based avoidance'''
         self.set_parameters({
@@ -12466,6 +12534,7 @@ return update, 1000
             self.Ch6TuningWPSpeed,
             self.PILOT_THR_BHV,
             self.GPSForYawCompassLearn,
+            self.IRBeaconYaw,
             self.CameraLogMessages,
             self.LoiterToGuidedHomeVSOrigin,
             self.GuidedModeThrust,

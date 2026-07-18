@@ -362,6 +362,7 @@ BUILD_OPTIONS = [
     Feature('Other', 'COMPASS_CAL', 'COMPASS_CAL_ENABLED', 'Enable "Tumble" compass calibration', 0, None),
     Feature('Other', 'DRONECAN_SERIAL', 'AP_DRONECAN_SERIAL_ENABLED', 'Enable DroneCAN virtual serial ports', 0, "DroneCAN,SERIALDEVICE_REGISTER"),  # NOQA: E501
     Feature('Other', 'MOTOR_CONTROL_OUTPUT', 'AP_MOTOR_CONTROL_OUTPUT_ENABLED', 'Enable serial motor control output', 0, None),  # NOQA: E501
+    Feature('Other', 'IR_BEACON_YAW', 'AP_IRBEACON_YAW_ENABLED', 'Enable IR beacon yaw receiver', 0, None),  # NOQA: E501
     Feature('Other', 'Buttons', 'HAL_BUTTON_ENABLED', 'Enable Buttons', 0, None),
     Feature('Other', 'Logging', 'HAL_LOGGING_ENABLED', 'Enable Logging', 0, None),
     Feature('Other', 'CUSTOM_ROTATIONS', 'AP_CUSTOMROTATIONS_ENABLED', 'Enable Custom  sensor rotations', 0, None),

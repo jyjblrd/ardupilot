@@ -86,6 +86,7 @@ public:
 
     void log_writeDefaultAirSpeed3(const float aspeed, const float uncertainty);
     void log_writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type);
+    void log_writeIRBeaconYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type);
 
     enum class StateMask {
         ARMED = (1U<<0),
@@ -404,4 +405,3 @@ namespace AP {
 
 // replay printf for debugging
 void rprintf(const char *format, ...);
-
