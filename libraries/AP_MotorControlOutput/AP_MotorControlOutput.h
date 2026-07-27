@@ -97,12 +97,20 @@ public:
     // Resume publishing the attitude controller's motor commands.
     void clear_pilot_passthrough();
 
+    // Set the body-frame roll bias added to the normalized PID command.
+    void set_roll_trim(float trim) { _roll_trim.set(trim); }
+
+    // Set the body-frame pitch bias added to the normalized PID command.
+    void set_pitch_trim(float trim) { _pitch_trim.set(trim); }
+
 private:
     bool should_send(uint32_t now_us);
     void fill_packet(const AP_Motors &motors, Packet &packet);
     uint16_t make_flags(const AP_Motors &motors, bool output_enabled) const;
 
     AP_Int16 _rate_hz;
+    AP_Float _roll_trim;
+    AP_Float _pitch_trim;
     AP_HAL::UARTDriver *_uart;
     uint32_t _last_send_us;
     uint32_t _sequence;

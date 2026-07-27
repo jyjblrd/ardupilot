@@ -12,6 +12,8 @@ Configure one ArduPilot serial port for the MotorControlOutput protocol:
 SERIALx_PROTOCOL = 50
 SERIALx_BAUD     = 921
 MCOUT_RATE       = 400
+MCOUT_ROLL_TRIM  = 0.0
+MCOUT_PITCH_TRIM = 0.0
 ```
 
 Replace `x` with the serial port connected to the external controller. For example, use `SERIAL1_PROTOCOL` and `SERIAL1_BAUD` for Serial1/Telem1.
@@ -19,6 +21,10 @@ Replace `x` with the serial port connected to the external controller. For examp
 `SERIALx_PROTOCOL=50` selects the `MotorControlOutput` protocol. When that protocol is selected, ArduPilot defaults the port to 921600 baud, disables flow control, and uses unbuffered writes. Setting `SERIALx_BAUD=921` makes that baud rate explicit in the parameter file.
 
 `MCOUT_RATE` is the requested publish rate in Hz. It accepts values from 1 to 400 and defaults to 400. The actual output rate is limited by the vehicle scheduler loop rate.
+
+`MCOUT_ROLL_TRIM` and `MCOUT_PITCH_TRIM` are normalized body-frame biases added to the corresponding stabilized PID commands before the external controller applies phase rotation and mixing. Both default to zero and accept `-1..1`. They do not affect `MCOUT_PASS` pilot passthrough commands.
+
+To adjust either trim from a transmitter knob or slider, assign that RC channel `RCx_OPTION=219` (`Transmitter Tuning`), set `TUNE=60` for roll or `TUNE=61` for pitch, and choose the knob endpoints with `TUNE_MIN` and `TUNE_MAX`. Select and tune one axis at a time.
 
 ### Pilot passthrough flight mode
 
@@ -77,7 +83,7 @@ The CRC is XMODEM CRC-16 over all packet bytes before the `crc` field. Receivers
 
 ### Command Fields
 
-`roll`, `pitch`, and `yaw` are normalized control commands formed from feedback plus feedforward terms. `throttle` is the filtered throttle command. These four primary command fields are set to zero unless ArduPilot considers actuator output enabled.
+`roll` and `pitch` are normalized control commands formed from feedback plus feedforward plus their configured body-frame trim. `yaw` is formed from feedback plus feedforward, and `throttle` is the filtered throttle command. These four primary command fields are set to zero unless ArduPilot considers actuator output enabled.
 
 Output is enabled when motors are armed, the motor interlock is enabled, and emergency stop is not active. Receivers should still make their own output decision from packet freshness and flags before driving actuators.
 

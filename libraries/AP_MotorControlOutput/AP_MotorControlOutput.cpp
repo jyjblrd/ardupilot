@@ -22,6 +22,22 @@ const AP_Param::GroupInfo AP_MotorControlOutput::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("RATE", 1, AP_MotorControlOutput, _rate_hz, AP_MotorControlOutput::DEFAULT_RATE_HZ),
 
+    // @Param: ROLL_TRIM
+    // @DisplayName: Body-frame roll output trim
+    // @Description: Bias added to the normalized roll PID command before external phase rotation and mixing. This does not affect MCOUT pilot passthrough mode.
+    // @Range: -1 1
+    // @Increment: 0.001
+    // @User: Advanced
+    AP_GROUPINFO("ROLL_TRIM", 2, AP_MotorControlOutput, _roll_trim, 0.0f),
+
+    // @Param: PITCH_TRIM
+    // @DisplayName: Body-frame pitch output trim
+    // @Description: Bias added to the normalized pitch PID command before external phase rotation and mixing. This does not affect MCOUT pilot passthrough mode.
+    // @Range: -1 1
+    // @Increment: 0.001
+    // @User: Advanced
+    AP_GROUPINFO("PITCH_TRIM", 3, AP_MotorControlOutput, _pitch_trim, 0.0f),
+
     AP_GROUPEND
 };
 
@@ -164,8 +180,9 @@ void AP_MotorControlOutput::fill_packet(const AP_Motors &motors, Packet &packet)
             packet.yaw = _pilot_yaw;
             packet.throttle = _pilot_throttle;
         } else {
-            packet.roll = roll_feedback + roll_feedforward;
-            packet.pitch = pitch_feedback + pitch_feedforward;
+            // Apply body-frame trim before the external controller rotates and mixes these commands.
+            packet.roll = roll_feedback + roll_feedforward + _roll_trim;
+            packet.pitch = pitch_feedback + pitch_feedforward + _pitch_trim;
             packet.yaw = yaw_feedback + yaw_feedforward;
             packet.throttle = motors.get_throttle();
         }

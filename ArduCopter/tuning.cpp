@@ -194,5 +194,15 @@ void Copter::tuning()
     case TUNING_POS_CONTROL_ANGLE_MAX:
         pos_control->set_lean_angle_max_cd(tuning_value * 100.0);
         break;
+
+#if AP_MOTOR_CONTROL_OUTPUT_ENABLED
+    case TUNING_MCOUT_ROLL_TRIM:
+        motor_control_output.set_roll_trim(tuning_value);
+        break;
+
+    case TUNING_MCOUT_PITCH_TRIM:
+        motor_control_output.set_pitch_trim(tuning_value);
+        break;
+#endif
     }
 }

@@ -51,7 +51,9 @@ enum tuning_func {
     TUNING_RATE_YAW_FILT =              56, // yaw rate input filter
     UNUSED =                            57, // was winch control
     TUNING_SYSTEM_ID_MAGNITUDE =        58, // magnitude of the system ID signal
-    TUNING_POS_CONTROL_ANGLE_MAX =      59  // position controller maximum angle
+    TUNING_POS_CONTROL_ANGLE_MAX =      59, // position controller maximum angle
+    TUNING_MCOUT_ROLL_TRIM =            60, // body-frame roll bias added to the normalized MCOUT PID command
+    TUNING_MCOUT_PITCH_TRIM =           61  // body-frame pitch bias added to the normalized MCOUT PID command
 };
 
 // Yaw behaviours during missions - possible values for WP_YAW_BEHAVIOR parameter
