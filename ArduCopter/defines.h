@@ -52,6 +52,8 @@ enum tuning_func {
     TUNING_POS_CONTROL_ANGLE_MAX =      59, // position controller maximum angle
     TUNING_LOITER_MAX_XY_SPEED =        60, // maximum loiter horizontal speed
     TUNING_WP_SPEED_MS =                61, // maximum speed to next waypoint in m/s
+    TUNING_MCOUT_ROLL_TRIM =            62, // body-frame roll bias added to the normalized MCOUT PID command
+    TUNING_MCOUT_PITCH_TRIM =           63  // body-frame pitch bias added to the normalized MCOUT PID command
 };
 
 // Airmode

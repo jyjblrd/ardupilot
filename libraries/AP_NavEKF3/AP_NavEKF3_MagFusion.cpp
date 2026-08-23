@@ -251,7 +251,8 @@ void NavEKF3_core::SelectMagFusion()
         (!use_compass() &&
          yaw_source_last != AP_NavEKF_Source::SourceYaw::GPS &&
          yaw_source_last != AP_NavEKF_Source::SourceYaw::GPS_COMPASS_FALLBACK &&
-         yaw_source_last != AP_NavEKF_Source::SourceYaw::EXTNAV)) {
+         yaw_source_last != AP_NavEKF_Source::SourceYaw::EXTNAV &&
+         yaw_source_last != AP_NavEKF_Source::SourceYaw::IRBEACON)) {
 
         if ((!yawAlignComplete || yaw_source_reset) && ((yaw_source_last != AP_NavEKF_Source::SourceYaw::GSF) || (EKFGSF_yaw_valid_count >= GSF_YAW_VALID_HISTORY_THRESHOLD))) {
             realignYawGPS(false);
@@ -280,6 +281,37 @@ void NavEKF3_core::SelectMagFusion()
             magTestRatio.zero();
             yawTestRatio = 0.0f;
             lastSynthYawTime_ms = imuSampleTime_ms;
+        }
+        return;
+    }
+
+    // Handle the pulse-based IR beacon yaw source.
+    if (yaw_source_last == AP_NavEKF_Source::SourceYaw::IRBEACON) {
+        if (storedIRBeaconYawAng.recall(irBeaconYawAngDataDelayed, imuDataDelayed.time_ms)) {
+            if (tiltAlignComplete && (!yawAlignComplete || yaw_source_reset)) {
+                alignYawAngle(irBeaconYawAngDataDelayed);
+                yaw_source_reset = false;
+                lastSynthYawTime_ms = imuSampleTime_ms;
+                last_irbeacon_yaw_fuse_ms = imuSampleTime_ms;
+                recordYawResetsCompleted();
+            } else if (tiltAlignComplete && yawAlignComplete) {
+                if (fuseEulerYaw(yawFusionMethod::IRBEACON)) {
+                    last_irbeacon_yaw_fuse_ms = imuSampleTime_ms;
+                }
+            }
+            last_irbeacon_yaw_ms = imuSampleTime_ms;
+        } else if (tiltAlignComplete && !yawAlignComplete) {
+            // A pulse yaw source may not be visible at startup; keep the filter stable while waiting.
+            if (imuSampleTime_ms - lastSynthYawTime_ms > 140) {
+                if (!onGroundNotMoving) {
+                    fuseEulerYaw(yawFusionMethod::PREDICTED);
+                } else {
+                    fuseEulerYaw(yawFusionMethod::STATIC);
+                }
+                lastSynthYawTime_ms = imuSampleTime_ms;
+            }
+        } else if (tiltAlignComplete && yawAlignComplete && onGround && imuSampleTime_ms - last_irbeacon_yaw_fuse_ms > 10000) {
+            yaw_source_reset = true;
         }
         return;
     }
@@ -838,6 +870,10 @@ bool NavEKF3_core::fuseEulerYaw(yawFusionMethod method)
         R_YAW = sq(yawAngDataDelayed.yawAngErr);
         break;
 
+    case yawFusionMethod::IRBEACON:
+        R_YAW = sq(irBeaconYawAngDataDelayed.yawAngErr);
+        break;
+
     case yawFusionMethod::GSF:
         R_YAW = gsfYawVariance;
         break;
@@ -864,6 +900,10 @@ bool NavEKF3_core::fuseEulerYaw(yawFusionMethod method)
     switch (method) {
     case yawFusionMethod::GPS:
         order = yawAngDataDelayed.order;
+        break;
+
+    case yawFusionMethod::IRBEACON:
+        order = irBeaconYawAngDataDelayed.order;
         break;
 
     case yawFusionMethod::STATIC:
@@ -1027,6 +1067,10 @@ bool NavEKF3_core::fuseEulerYaw(yawFusionMethod method)
 
     case yawFusionMethod::GPS:
         innovYaw = wrap_PI(yawAngPredicted - yawAngDataDelayed.yawAng);
+        break;
+
+    case yawFusionMethod::IRBEACON:
+        innovYaw = wrap_PI(yawAngPredicted - irBeaconYawAngDataDelayed.yawAng);
         break;
 
     case yawFusionMethod::STATIC:

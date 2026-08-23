@@ -217,6 +217,16 @@ void Copter::tuning(const RC_Channel *tuning_ch, int8_t tuning_param, float tuni
     case TUNING_WP_SPEED_MS:
         flightmode->set_speed_NE_ms(tuning_value);
         break;
+
+#if AP_MOTOR_CONTROL_OUTPUT_ENABLED
+    case TUNING_MCOUT_ROLL_TRIM:
+        motor_control_output.set_roll_trim(tuning_value);
+        break;
+
+    case TUNING_MCOUT_PITCH_TRIM:
+        motor_control_output.set_pitch_trim(tuning_value);
+        break;
+#endif
     }
 }
 

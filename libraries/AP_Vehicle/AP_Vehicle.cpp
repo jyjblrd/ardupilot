@@ -298,6 +298,12 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     AP_SUBGROUPINFO(beacon, "BCN", 33, AP_Vehicle, AP_Beacon),
 #endif  // AP_BEACON_ENABLED
 
+#if AP_IRBEACON_YAW_ENABLED
+    // @Group: IRYAW_
+    // @Path: ../AP_IRBeaconYaw/AP_IRBeaconYaw.cpp
+    AP_SUBGROUPINFO(irbeaconyaw, "IRYAW_", 34, AP_Vehicle, AP_IRBeaconYaw),
+#endif
+
     AP_GROUPEND
 };
 
@@ -438,6 +444,10 @@ void AP_Vehicle::setup()
 #if AP_BEACON_ENABLED
     beacon.init();
 #endif  // AP_BEACON_ENABLED
+
+#if AP_IRBEACON_YAW_ENABLED
+    irbeaconyaw.init();
+#endif
 
     // init_ardupilot is where the vehicle does most of its initialisation.
     init_ardupilot();
@@ -666,6 +676,9 @@ const AP_Scheduler::Task AP_Vehicle::scheduler_tasks[] = {
 #endif
 #if AP_SERVO_TELEM_ENABLED
     SCHED_TASK_CLASS(AP_Servo_Telem, &vehicle.servo_telem,  update,                   50,  50, 231),
+#endif
+#if AP_IRBEACON_YAW_ENABLED
+    SCHED_TASK_CLASS(AP_IRBeaconYaw, &vehicle.irbeaconyaw,  update,                  100,  50, 232),
 #endif
 #if HAL_GENERATOR_ENABLED
     SCHED_TASK_CLASS(AP_Generator, &vehicle.generator,      update,                   10,  50, 235),

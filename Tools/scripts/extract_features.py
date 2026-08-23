@@ -278,6 +278,8 @@ class ExtractFeatures(BuildScriptBase):
             ('AP_DRONECAN_SERIAL_ENABLED', 'AP_DroneCAN_Serial::update'),
             ('AP_SERIALMANAGER_IMUOUT_ENABLED', 'AP_InertialSensor::send_uart_data'),
             ('AP_NETWORKING_ENABLED', 'AP_Networking::init'),
+            ('AP_MOTOR_CONTROL_OUTPUT_ENABLED', 'AP_MotorControlOutput::update'),
+            ('AP_IRBEACON_YAW_ENABLED', 'AP_IRBeaconYaw::update'),
             ('AP_NETWORKING_BACKEND_PPP', 'AP_Networking_PPP::init'),
             ('AP_NETWORKING_CAN_MCAST_ENABLED', 'AP_Networking_CAN::start'),
             ('AP_NETWORKING_CAPTURE_ENABLED', 'AP_Networking_Backend::capture_pbuf'),

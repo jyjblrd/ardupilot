@@ -264,6 +264,19 @@ void AP_DAL::log_writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t 
 #endif
 }
 
+void AP_DAL::log_writeIRBeaconYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
+{
+#if !APM_BUILD_TYPE(APM_BUILD_AP_DAL_Standalone) && !APM_BUILD_TYPE(APM_BUILD_Replay)
+    struct log_RIY3 pkt{
+        yawangle       : yawAngle,
+        yawangleerr    : yawAngleErr,
+        timestamp_ms   : timeStamp_ms,
+        type           : type,
+    };
+    WRITE_REPLAY_BLOCK(RIY3, pkt);
+#endif
+}
+
 int AP_DAL::snprintf(char* str, size_t size, const char *format, ...) const
 {
     va_list ap;
@@ -592,4 +605,3 @@ void rprintf(const char *format, ...)
     va_end(ap);
 #endif
 }
-

@@ -65,6 +65,7 @@
 #include <AP_Devo_Telem/AP_Devo_Telem.h>     // AP_DEVO_TELEM_ENABLED
 #include <AP_LTM_Telem/AP_LTM_Telem.h>       // AP_LTM_TELEM_ENABLED
 #include <AP_Hott_Telem/AP_Hott_Telem.h>     // HAL_HOTT_TELEM_ENABLED
+#include <AP_MotorControlOutput/AP_MotorControlOutput_config.h> // AP_MOTOR_CONTROL_OUTPUT_ENABLED
 
 /*
   returns true if handling for the given serial protocol is compiled into this
@@ -97,6 +98,7 @@ constexpr bool serial_protocol_compiled_in(AP_SerialManager::SerialProtocol p)
         (p != AP_SerialManager::SerialProtocol_LTM_Telem        || (AP_LTM_TELEM_ENABLED)) &&
         (p != AP_SerialManager::SerialProtocol_MSP              || (HAL_MSP_ENABLED)) &&
         (p != AP_SerialManager::SerialProtocol_MSP_DisplayPort  || (HAL_MSP_ENABLED)) &&
+        (p != AP_SerialManager::SerialProtocol_MotorControlOutput || (AP_MOTOR_CONTROL_OUTPUT_ENABLED)) &&
         (p != AP_SerialManager::SerialProtocol_NMEAOutput       || (HAL_NMEA_OUTPUT_ENABLED)) &&
         (p != AP_SerialManager::SerialProtocol_OpticalFlow      || (AP_OPTICALFLOW_ENABLED)) &&
         (p != AP_SerialManager::SerialProtocol_PPP              || (AP_NETWORKING_BACKEND_PPP)) &&

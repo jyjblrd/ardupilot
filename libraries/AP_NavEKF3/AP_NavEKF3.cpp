@@ -1683,6 +1683,15 @@ void NavEKF3::writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_t tim
     }
 }
 
+void NavEKF3::writeIRBeaconYawAngle(float yawAngle, float yawAngleErr, uint32_t timeStamp_ms, uint8_t type)
+{
+    if (core) {
+        for (uint8_t i = 0; i < num_cores; i++) {
+            core[i].writeIRBeaconYawAngle(yawAngle, yawAngleErr, timeStamp_ms, type);
+        }
+    }
+}
+
 /*
  * Write position and quaternion data from an external navigation system
  *

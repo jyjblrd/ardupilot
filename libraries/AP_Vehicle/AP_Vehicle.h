@@ -39,6 +39,7 @@
 #include <AP_Generator/AP_Generator.h>
 #include <AP_Logger/AP_Logger.h>
 #include <AP_InertialSensor/AP_InertialSensor.h>
+#include <AP_IRBeaconYaw/AP_IRBeaconYaw.h>
 #include <AP_Notify/AP_Notify.h>                    // Notify library
 #include <AP_Param/AP_Param.h>
 #include <AP_RangeFinder/AP_RangeFinder.h>
@@ -366,6 +367,9 @@ protected:
 #endif
 #if AP_RANGEFINDER_ENABLED
     RangeFinder rangefinder;
+#endif
+#if AP_IRBEACON_YAW_ENABLED
+    AP_IRBeaconYaw irbeaconyaw;
 #endif
 
 #if HAL_LOGGING_ENABLED

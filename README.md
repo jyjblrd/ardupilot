@@ -1,5 +1,7 @@
 # ArduPilot Project
 
+This fork extends ArduCopter for custom spinning and externally controlled vehicles with a serial Motor Control Output (`MCOUT`) stream—including stabilized commands, transmitter-adjustable trim, and direct pilot passthrough—and an IR-beacon absolute-yaw source for EKF3. See the [Motor Control Output guide](libraries/AP_MotorControlOutput/README.md) and [IR Beacon Yaw guide](libraries/AP_IRBeaconYaw/README.md) for configuration, packet format, safety, calibration, and testing details.
+
 [![Discord](https://img.shields.io/discord/674039678562861068.svg)](https://ardupilot.org/discord)
 
 [![Test Copter](https://github.com/ArduPilot/ardupilot/workflows/test%20copter/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_copter.yml) [![Test Plane](https://github.com/ArduPilot/ardupilot/workflows/test%20plane/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_plane.yml) [![Test Rover](https://github.com/ArduPilot/ardupilot/workflows/test%20rover/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_rover.yml) [![Test Sub](https://github.com/ArduPilot/ardupilot/workflows/test%20sub/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_sub.yml) [![Test Tracker](https://github.com/ArduPilot/ardupilot/workflows/test%20tracker/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_tracker.yml)
