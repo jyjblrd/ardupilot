@@ -19,6 +19,8 @@ EK3_SRC1_YAW   = 9   # IRBeacon
 
 The GPIO interrupt timestamps and blanks pulses before the 100 Hz backend task transfers them to the frontend. Each EKF3 core consumes the sample once through a dedicated IR-beacon buffer and fusion method. The `IRYW` log records raw and corrected pulse times, configured yaw and accuracy, pulse interval, and pulse count.
 
+While the receiver is enabled, `NAMED_VALUE_FLOAT.IRYW_CNT` publishes the accepted pulse count over MAVLink once per second for live inspection without onboard logging.
+
 Demodulating IR receivers commonly have active-low outputs, so use the falling edge. A servo output can be used as a GPIO when the board supports it by setting its `SERVOx_FUNCTION` to `-1`; use the board's documented GPIO number for `IRYAW_PIN`. The receiver should provide a clean digital edge, and its field of view and timing jitter should be included in `IRYAW_ACC`.
 
 Calibrate `IRYAW_YAW` by interpolating a trusted heading at each `IRYW.PT` timestamp. A fixed mounting offset, field-of-view leading edge, and any residual receiver latency appear as a constant yaw offset for one spin direction. Reversing spin direction changes the sign of timing-related error, so bidirectional operation requires an accurate `IRYAW_DELAY` rather than folding all latency into `IRYAW_YAW`.

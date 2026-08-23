@@ -10014,6 +10014,15 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
         self.context_collect('STATUSTEXT')
         self.set_rc(4, 1900)
         self.wait_statustext("yaw aligned", timeout=30, check_context=True)
+
+        telemetry_deadline = self.get_sim_time() + 10
+        while True:
+            pulse_count = self.assert_receive_named_value_float("IRYW_CNT")
+            if pulse_count.value >= 1:
+                break
+            if self.get_sim_time_cached() > telemetry_deadline:
+                raise NotAchievedException("IR yaw pulse count was not published")
+
         self.wait_statustext("is using GPS", timeout=60, check_context=True)
         self.delay_sim_time(10)
 

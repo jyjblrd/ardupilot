@@ -9,6 +9,9 @@
 #include <AP_HAL/AP_HAL.h>
 #include <AP_Logger/AP_Logger.h>
 #include <AP_Math/AP_Math.h>
+#if HAL_GCS_ENABLED
+#include <GCS_MAVLink/GCS.h>
+#endif
 
 AP_IRBeaconYaw *AP_IRBeaconYaw::_singleton;
 
@@ -77,7 +80,8 @@ AP_IRBeaconYaw::AP_IRBeaconYaw() :
     _backend(nullptr),
     _last_pulse_us(0),
     _sample_time_ms(0),
-    _pulse_sequence(0)
+    _pulse_sequence(0),
+    _last_mavlink_send_ms(0)
 {
     if (_singleton != nullptr) {
         AP_HAL::panic("AP_IRBeaconYaw must be singleton");
@@ -114,6 +118,14 @@ void AP_IRBeaconYaw::update()
 {
     if (_backend != nullptr) {
         _backend->update();
+
+#if HAL_GCS_ENABLED
+        const uint32_t now_ms = AP_HAL::millis();
+        if (now_ms - _last_mavlink_send_ms >= 1000U) {
+            _last_mavlink_send_ms = now_ms;
+            gcs().send_named_float("IRYW_CNT", static_cast<float>(_pulse_sequence));
+        }
+#endif
     }
 }
 

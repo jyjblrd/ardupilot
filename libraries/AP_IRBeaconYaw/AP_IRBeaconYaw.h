@@ -72,6 +72,7 @@ private:
     uint64_t _last_pulse_us;
     uint32_t _sample_time_ms;
     uint32_t _pulse_sequence;
+    uint32_t _last_mavlink_send_ms;
 };
 
 namespace AP {
